@@ -15,13 +15,9 @@ public class PlaceholderReplacer {
     public int replace(WordprocessingMLPackage wordPackage, Map<String, String> values) {
         int count = 0;
         for (Part part : WordParts.jaxbParts(wordPackage)) {
-            ParagraphCollector paragraphCollector = new ParagraphCollector();
             try {
                 Object jaxbElement = WordParts.getJaxbElement(part);
-                new TraversalUtil(jaxbElement, paragraphCollector);
-                for (P paragraph : paragraphCollector.getParagraphs()) {
-                    count += replaceInParagraph(paragraph, values);
-                }
+                count += replaceInObject(jaxbElement, values);
             } catch (ReflectiveOperationException e) {
                 // Skip parts that cannot be processed
             }
@@ -29,7 +25,17 @@ public class PlaceholderReplacer {
         return count;
     }
 
-    private int replaceInParagraph(P paragraph, Map<String, String> values) {
+    public int replaceInObject(Object root, Map<String, String> values) {
+        ParagraphCollector paragraphCollector = new ParagraphCollector();
+        new TraversalUtil(root, paragraphCollector);
+        int count = 0;
+        for (P paragraph : paragraphCollector.getParagraphs()) {
+            count += replaceInParagraph(paragraph, values);
+        }
+        return count;
+    }
+
+    int replaceInParagraph(P paragraph, Map<String, String> values) {
         TextNodeCollector textCollector = new TextNodeCollector();
         new TraversalUtil(paragraph, textCollector);
         List<Text> nodes = textCollector.getTexts();

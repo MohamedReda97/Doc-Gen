@@ -2,10 +2,13 @@ package com.bankaudi.baw.document.api;
 
 import com.bankaudi.baw.document.engine.PlaceholderExtractor;
 import com.bankaudi.baw.document.engine.PlaceholderReplacer;
+import com.bankaudi.baw.document.docx.DocxTemplateSanitizer;
+import com.bankaudi.baw.document.engine.TableRowRepeater;
 import com.bankaudi.baw.document.font.ArabicRunDecorator;
 import com.bankaudi.baw.document.font.BundledFontRegistry;
 import com.bankaudi.baw.document.font.FontNameRewriter;
 import com.bankaudi.baw.document.json.FlatMappingJsonParser;
+import com.bankaudi.baw.document.json.TableMappingJsonParser;
 import com.bankaudi.baw.document.pdf.PdfConverter;
 import com.bankaudi.baw.document.validation.TemplateValidator;
 import com.bankaudi.baw.document.validation.ValidationReport;
@@ -16,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,9 +28,12 @@ public class DocumentGenerator {
     private static final DocumentGenerator INSTANCE = new DocumentGenerator();
 
     private final FlatMappingJsonParser jsonParser = new FlatMappingJsonParser();
+    private final TableMappingJsonParser tableMappingJsonParser = new TableMappingJsonParser();
     private final PlaceholderExtractor placeholderExtractor = new PlaceholderExtractor();
     private final PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer();
+    private final TableRowRepeater tableRowRepeater = new TableRowRepeater();
     private final TemplateValidator templateValidator = new TemplateValidator();
+    private final DocxTemplateSanitizer docxTemplateSanitizer = new DocxTemplateSanitizer();
     private final BundledFontRegistry fontRegistry = new BundledFontRegistry();
     private final ArabicRunDecorator arabicRunDecorator = new ArabicRunDecorator();
     private final FontNameRewriter fontNameRewriter = new FontNameRewriter();
@@ -41,10 +48,14 @@ public class DocumentGenerator {
         long startedAt = System.currentTimeMillis();
         WordprocessingMLPackage wordPackage = loadTemplate(docxTemplateBytes);
         Map<String, String> values = jsonParser.parse(flatMappingJson);
+        Map<String, java.util.List<Map<String, String>>> tables = tableMappingJsonParser.parse(flatMappingJson);
 
         ValidationReport report = templateValidator.validate(wordPackage);
         logValidation(report);
-        logMappingWarnings(report.getPlaceholders(), values.keySet());
+        logMappingWarnings(report.getPlaceholders(), allSuppliedKeys(values, tables));
+
+        int repeatedRows = tableRowRepeater.repeat(wordPackage, tables);
+        LOG.info("Repeated {} table rows", repeatedRows);
 
         int replacements = placeholderReplacer.replace(wordPackage, values);
         LOG.info("Replaced {} placeholders", replacements);
@@ -88,7 +99,8 @@ public class DocumentGenerator {
         if (docxTemplateBytes == null || docxTemplateBytes.length == 0) {
             throw new DocumentGenerationException("DOC-001", "DOCX template bytes are empty");
         }
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(docxTemplateBytes)) {
+        byte[] sanitizedTemplateBytes = docxTemplateSanitizer.sanitize(docxTemplateBytes);
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(sanitizedTemplateBytes)) {
             return WordprocessingMLPackage.load(inputStream);
         } catch (Exception e) {
             throw new DocumentGenerationException("DOC-002", "Failed to load DOCX template", e);
@@ -116,6 +128,18 @@ public class DocumentGenerator {
         for (String key : unused) {
             LOG.warn("JSON key {} is not used by the template", key);
         }
+    }
+
+    private Set<String> allSuppliedKeys(Map<String, String> values, Map<String, List<Map<String, String>>> tables) {
+        Set<String> suppliedKeys = new LinkedHashSet<>(values.keySet());
+        for (Map.Entry<String, List<Map<String, String>>> table : tables.entrySet()) {
+            for (Map<String, String> row : table.getValue()) {
+                for (String field : row.keySet()) {
+                    suppliedKeys.add(table.getKey() + "[]." + field);
+                }
+            }
+        }
+        return suppliedKeys;
     }
 
     private byte[] readAllBytes(InputStream inputStream) throws java.io.IOException {

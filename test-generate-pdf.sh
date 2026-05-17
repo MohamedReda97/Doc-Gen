@@ -9,7 +9,7 @@ Usage:
   ./test-generate-pdf.sh <template.docx> <data.json> [output.pdf]
 
 Examples:
-  ./test-generate-pdf.sh "personal-loan-application.docx" Personal_Loan_Application_form_variables.json
+  ./test-generate-pdf.sh "Pledge_Letter_FRESH_USD.docx" Pledge_Letter_FRESH_USD_variables.json
   ./test-generate-pdf.sh my-template.docx my-data.json target/generated-pdfs/my-output.pdf
 USAGE
 }
