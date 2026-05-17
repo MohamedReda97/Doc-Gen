@@ -15,6 +15,8 @@ import org.docx4j.wml.Text;
 import java.util.List;
 
 public class ArabicRunDecorator {
+    private final ScriptRunFormatter scriptRunFormatter = new ScriptRunFormatter();
+
     public void decorate(WordprocessingMLPackage wordPackage) {
         for (Part part : com.bankaudi.baw.document.engine.WordParts.jaxbParts(wordPackage)) {
             try {
@@ -39,24 +41,7 @@ public class ArabicRunDecorator {
         TextCollector collector = new TextCollector();
         new TraversalUtil(run, collector);
         for (String text : collector.values) {
-            if (containsArabic(text)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean containsArabic(String text) {
-        if (text == null) {
-            return false;
-        }
-        for (int i = 0; i < text.length(); i++) {
-            Character.UnicodeBlock block = Character.UnicodeBlock.of(text.charAt(i));
-            if (block == Character.UnicodeBlock.ARABIC
-                    || block == Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_A
-                    || block == Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_B
-                    || block == Character.UnicodeBlock.ARABIC_SUPPLEMENT
-                    || block == Character.UnicodeBlock.ARABIC_EXTENDED_A) {
+            if (scriptRunFormatter.containsArabic(text)) {
                 return true;
             }
         }
@@ -76,8 +61,6 @@ public class ArabicRunDecorator {
             rPr.setRFonts(fonts);
         }
         fonts.setCs("Noto Naskh Arabic");
-        fonts.setAscii("Noto Naskh Arabic");
-        fonts.setHAnsi("Noto Naskh Arabic");
 
         CTLanguage language = rPr.getLang();
         if (language == null) {

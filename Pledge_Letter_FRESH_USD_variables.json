@@ -11,25 +11,11 @@
   "flat_mapping": {
     "DATE": "17/05/2026",
     "BRANCH": "Beirut Central Branch",
-    "SIGNATORIES": "Ahmed Mohamed Nasser",
+    "SIGNATORIES": "السيد أحمد محمد ناصر والسيدة ليلى سمير ناصر",
     "RESIDENCE_ADDRESS": "شارع الحمرا، بناية السلام، الطابق الخامس، بيروت، لبنان",
     "ACCOUT_NUMBER": "001-123456-789",
-    "ACCOUNT_BRANCH": "Beirut Central Branch"
-  },
-  "tables": {
-    "customers": [
-      {
-        "cif_number": "CIF-458291",
-        "customer_full_name": "Ahmed Mohamed Nasser"
-      },
-      {
-        "cif_number": "CIF-782144",
-        "customer_full_name": "Layla Samir Nasser"
-      },
-      {
-        "cif_number": "CIF-993510",
-        "customer_full_name": "Omar Khaled Haddad"
-      }
-    ]
+    "ACCOUNT_BRANCH": "Beirut Central Branch",
+    "CIF_NUMBER": "CIF-458291",
+    "CUSTOMER_FULL_NAME": "Ahmed Mohamed Nasser"
   }
 }
