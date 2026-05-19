@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +44,18 @@ class TemplateInspectionTest {
             if (inputStream == null) {
                 throw new IllegalArgumentException("Missing test resource " + path);
             }
-            return inputStream.readAllBytes();
+            return readAllBytes(inputStream);
+        }
+    }
+
+    private byte[] readAllBytes(InputStream inputStream) throws Exception {
+        byte[] buffer = new byte[8192];
+        int read;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            return outputStream.toByteArray();
         }
     }
 

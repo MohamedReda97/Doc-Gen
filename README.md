@@ -1,6 +1,6 @@
 # BAW Document Generator
 
-Self-contained Java 11 library for filling DOCX templates from flat JSON data and producing PDF bytes using docx4j + Apache FOP.
+Self-contained Java 8-compatible library for filling DOCX templates from flat JSON data and producing PDF bytes using docx4j + Apache FOP.
 
 ## Build
 
@@ -13,6 +13,8 @@ The deployable artifact is:
 ```text
 target/document-generator-1.0.0-shaded.jar
 ```
+
+The shaded JAR is compiled for Java class major version 52 so it can run on IBM BAW environments that support Java 8 bytecode.
 
 ## Main API
 
@@ -32,6 +34,29 @@ And generated with:
 ```java
 byte[] pdf = DocumentGenerator.getInstance()
     .generatePdf("personal-loan-application", jsonPayload);
+```
+
+## IBM BAW API
+
+Use the BAW-friendly facade when discovering the JAR as an IBM BAW External Java Service:
+
+```java
+String pdfBase64 = new BawDocumentService()
+    .generatePdfBase64("personal-loan-application", jsonPayload);
+```
+
+Class to discover:
+
+```text
+com.bankaudi.baw.document.api.BawDocumentService
+```
+
+When generation fails, this facade throws a runtime error with a readable one-line message containing the library error code, template name, JSON preview, and root cause. This makes BAW service-flow testing easier without opening server logs for every failure.
+
+Complete BAW deployment and usage instructions are in:
+
+```text
+IBM_BAW_JAR_USAGE.md
 ```
 
 ## JSON Contract
@@ -83,3 +108,5 @@ The repository includes:
 - Bundled resource template: `templates/personal-loan-application.docx`
 
 The sample template currently has 142 detected placeholders, all present in the sample `flat_mapping`.
+
+tail -f /archfs/IBM/WebSphere/AppServer/profiles/Node1Profile/logs/ProcessCenter.SingleCluster.bpmdevappNode01.0/SystemOut.log

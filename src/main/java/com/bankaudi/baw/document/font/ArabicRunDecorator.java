@@ -1,6 +1,6 @@
 package com.bankaudi.baw.document.font;
 
-import jakarta.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBElement;
 import org.docx4j.TraversalUtil;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;

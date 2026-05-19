@@ -5,6 +5,7 @@ import com.bankaudi.baw.document.api.DocumentGenerator;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 public final class DocumentGeneratorCli {
     private DocumentGeneratorCli() {
@@ -21,7 +22,7 @@ public final class DocumentGeneratorCli {
         Path outputPath = Paths.get(args[2]);
 
         byte[] template = Files.readAllBytes(templatePath);
-        String json = Files.readString(jsonPath);
+        String json = new String(Files.readAllBytes(jsonPath), StandardCharsets.UTF_8);
         byte[] pdf = DocumentGenerator.getInstance().generatePdf(template, json);
 
         Path parent = outputPath.toAbsolutePath().getParent();
