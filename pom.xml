@@ -3,35 +3,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.bankaudi.baw</groupId>
-    <artifactId>document-generator</artifactId>
+    <groupId>com.bawdocgen</groupId>
+    <artifactId>baw-docx-generator</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>BAW Document Generator</name>
-    <description>Self-contained DOCX template to PDF generator for IBM BAW</description>
+    <name>BAW DOCX Generator</name>
+    <description>Self-contained DOCX template generator for IBM BAW</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <docx4j.version>8.3.15</docx4j.version>
         <jackson.version>2.17.2</jackson.version>
         <junit.version>5.10.3</junit.version>
         <slf4j.version>2.0.13</slf4j.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.docx4j</groupId>
-            <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
-            <version>${docx4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.docx4j</groupId>
-            <artifactId>docx4j-export-fo</artifactId>
-            <version>${docx4j.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -52,12 +41,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>2.0.32</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -109,7 +92,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.fasterxml.jackson</pattern>
-                                    <shadedPattern>com.bankaudi.baw.document.shaded.jackson</shadedPattern>
+                                    <shadedPattern>com.bawdocgen.shaded.jackson</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
