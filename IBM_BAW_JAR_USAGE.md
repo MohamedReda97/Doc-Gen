@@ -272,7 +272,44 @@ file output.docx
 
 Where `generated-docx.txt` contains the exact returned `docxBase64` string.
 
-## 10. Local Smoke Test Before Deploying
+## 10. Prepare The DOCX For ECM Upload
+
+For IBM BAW ECM operations, prefer passing the generated Base64 directly as an `ECMContentStream` instead of writing a temporary file first.
+
+IBM documents `ECMContentStream` with these relevant fields:
+
+- `content`: Base64 document content as a `String`.
+- `contentLength`: original binary length in bytes.
+- `fileName`: document file name.
+- `mimeType`: document MIME type.
+
+Use this MIME type for DOCX:
+
+```text
+application/vnd.openxmlformats-officedocument.wordprocessingml.document
+```
+
+Example BAW script after calling `generateDocxBase64`:
+
+```javascript
+var docxBytes = Packages.javax.xml.bind.DatatypeConverter.parseBase64Binary(tw.local.docxBase64);
+
+if (docxBytes.length < 2 || docxBytes[0] != 0x50 || docxBytes[1] != 0x4B) {
+  throw "Generated document is not a valid DOCX ZIP stream";
+}
+
+tw.local.contentStream = new tw.object.ECMContentStream();
+tw.local.contentStream.content = tw.local.docxBase64;
+tw.local.contentStream.contentLength = docxBytes.length;
+tw.local.contentStream.fileName = "personal-loan-application.docx";
+tw.local.contentStream.mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+```
+
+Then map `tw.local.contentStream` into the ECM operation that creates, checks in, or sets document content.
+
+Only decode to a temporary file if a downstream integration specifically requires a server file path. A temp-file bridge is more fragile in clustered BAW environments because the file exists only on the JVM node that created it and must be cleaned up later.
+
+## 11. Local Smoke Test Before Deploying
 
 Build and run the automated tests:
 
@@ -286,7 +323,7 @@ Then package the shaded JAR:
 mvn clean package
 ```
 
-## 11. Error Handling In BAW
+## 12. Error Handling In BAW
 
 The BAW-facing method:
 
@@ -325,7 +362,7 @@ BAW DOCX generation failed | code=DOC-001 | message=Bundled template not found: 
 
 For successful calls, the method returns only the Base64 DOCX string.
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
 ### `bad major version 55.0`
 
@@ -368,7 +405,7 @@ jar tf target/baw-docx-generator-1.0.0-shaded.jar | grep templates/
 
 DOCX Base64 is about 33 percent larger than the binary DOCX. For very large documents, prefer a follow-up Java service that stores the DOCX directly in a repository and returns a document ID or URL instead of carrying the full Base64 string through process variables.
 
-## 13. Recommended BAW Flow
+## 14. Recommended BAW Flow
 
 ```text
 Service Flow
